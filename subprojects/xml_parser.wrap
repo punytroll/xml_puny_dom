@@ -4,5 +4,4 @@ revision = main
 depth = 1
 
 [provide]
-
 xml_parser = xml_parser_library_dependency
