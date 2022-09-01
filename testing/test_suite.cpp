@@ -19,6 +19,7 @@
 
 #include <cassert>
 #include <memory>
+#include <ranges>
 #include <sstream>
 
 #include <xml_puny_dom/xml_puny_dom.h>
@@ -45,7 +46,7 @@ auto main([[maybe_unused]] int argc, [[maybe_unused]] char * argv[]) -> int
         assert(DOM->GetDocumentElement() != nullptr);
         assert(DOM->GetDocumentElement()->GetName() == "root");
         assert(DOM->GetDocumentElement()->GetChildNodes().size() == 1);
-        assert(DOM->GetDocumentElement()->GetChildElements().size() == 0);
+        assert(XML::IsText(DOM->GetDocumentElement()->GetChildNodes()[0]) == true);
     }
     {
         auto DOM = ReadDOMFromString("<root><a/><b/><c/></root>");
@@ -53,6 +54,24 @@ auto main([[maybe_unused]] int argc, [[maybe_unused]] char * argv[]) -> int
         assert(DOM->GetDocumentElement() != nullptr);
         assert(DOM->GetDocumentElement()->GetName() == "root");
         assert(DOM->GetDocumentElement()->GetChildNodes().size() == 3);
-        assert(DOM->GetDocumentElement()->GetChildElements().size() == 3);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[0]) == true);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[1]) == true);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[2]) == true);
     }
+    {
+        auto DOM = ReadDOMFromString("<root><a/>  <b/><c/>   </root>");
+        
+        assert(DOM->GetDocumentElement() != nullptr);
+        assert(DOM->GetDocumentElement()->GetName() == "root");
+        assert(DOM->GetDocumentElement()->GetChildNodes().size() == 5);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[0]) == true);
+        assert(XML::IsText(DOM->GetDocumentElement()->GetChildNodes()[1]) == true);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[2]) == true);
+        assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[3]) == true);
+        assert(XML::IsText(DOM->GetDocumentElement()->GetChildNodes()[4]) == true);
+        assert(std::ranges::distance(DOM->GetDocumentElement()->GetChildNodes() | std::views::filter(XML::IsElement)) == 3);
+        assert(std::ranges::distance(DOM->GetDocumentElement()->GetChildNodes() | std::views::filter(XML::IsText)) == 2);
+    }
+    
+    return 0;
 }

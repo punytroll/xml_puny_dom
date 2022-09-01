@@ -1,7 +1,7 @@
 project(
   'xml_puny_dom',
   'cpp',
-  version: '2.0.0',
+  version: '2.1.0',
   meson_version: '>=0.63.0',
   default_options: [
     'cpp_std=c++20',

@@ -43,7 +43,6 @@ namespace XML
     public:
         Node(XML::NodeType NodeType, XML::Node * ParentNode);
         virtual ~Node(void);
-        auto GetChildElements(void) const -> std::vector<XML::Element *>;
         auto GetChildNodes(void) const -> std::vector<XML::Node *> const &;
         auto GetChildNode(std::vector<XML::Node *>::size_type Index) const -> XML::Node const *;
         auto GetNodeType(void) const -> XML::NodeType;
@@ -85,6 +84,9 @@ namespace XML
     private:
         XML::Element * m_DocumentElement;
     };
+    
+    auto IsElement(XML::Node const * Node) -> bool;
+    auto IsText(XML::Node const * Node) -> bool;
 }
 
 #endif

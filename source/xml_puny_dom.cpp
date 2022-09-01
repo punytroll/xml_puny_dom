@@ -122,21 +122,6 @@ XML::Node::~Node(void)
     }
 }
 
-auto XML::Node::GetChildElements(void) const -> std::vector<XML::Element *>
-{
-    auto Result = std::vector<XML::Element *>{};
-    
-    for(auto ChildNode : m_ChildNodes)
-    {
-        if(ChildNode->GetNodeType() == XML::NodeType::Element)
-        {
-            Result.push_back(dynamic_cast<XML::Element *>(ChildNode));
-        }
-    }
-    
-    return Result;
-}
-
 auto XML::Node::GetChildNodes(void) const -> std::vector<XML::Node *> const &
 {
     return m_ChildNodes;
@@ -213,4 +198,14 @@ XML::Document::~Document(void)
 auto XML::Document::GetDocumentElement(void) const -> XML::Element const *
 {
     return m_DocumentElement;
+}
+
+auto XML::IsElement(XML::Node const * Node) -> bool
+{
+    return Node->GetNodeType() == XML::NodeType::Element;
+}
+
+auto XML::IsText(XML::Node const * Node) -> bool
+{
+    return Node->GetNodeType() == XML::NodeType::Text;
 }
