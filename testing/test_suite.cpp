@@ -76,6 +76,26 @@ auto main([[maybe_unused]] int argc, [[maybe_unused]] char * argv[]) -> int
         assert(std::ranges::distance(DOM->GetDocumentElement()->GetChildNodes() | std::views::filter(XML::IsElement)) == 3);
         assert(std::ranges::distance(DOM->GetDocumentElement()->GetChildNodes() | std::views::filter(XML::IsText)) == 2);
     }
+    {
+        auto DOM = ReadDOMFromString("<root><a/>  <b/><c/>   </root>");
+        auto Result = std::string{""};
+        
+        for(auto String : DOM->GetDocumentElement()->GetChildElements() | std::views::transform([](XML::Element const * Element) { return Element->GetName(); }))
+        {
+            Result += String;
+        }
+        assert(Result == "abc");
+    }
+    {
+        auto DOM = ReadDOMFromString("<root><a>1</a>2<b/>3<b/>45<c>6<d>7</d><d/></c> 8</root>");
+        auto Result = std::string{""};
+        
+        for(auto String : DOM->GetDocumentElement()->GetChildTexts() | std::views::transform([](XML::Text const * Text) { return Text->GetText(); }))
+        {
+            Result += String;
+        }
+        assert(Result == "2345 8");
+    }
     
     return 0;
 }

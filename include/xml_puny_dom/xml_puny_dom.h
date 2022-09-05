@@ -25,9 +25,10 @@
 #define XML_PUNY_DOM__XML_PUNY_DOM_H
 
 #include <istream>
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
+#include <ranges>
 
 namespace XML
 {
@@ -40,6 +41,10 @@ namespace XML
     
     class Document;
     class Element;
+    class Node;
+    
+    auto IsElement(XML::Node const * Node) -> bool;
+    auto IsText(XML::Node const * Node) -> bool;
     
     class Node
     {
@@ -47,8 +52,10 @@ namespace XML
     public:
         Node(XML::NodeType NodeType, XML::Node * ParentNode);
         virtual ~Node(void);
+        auto GetChildElements(void) const;
         auto GetChildNodes(void) const -> std::vector<XML::Node *> const &;
         auto GetChildNode(std::vector<XML::Node *>::size_type Index) const -> XML::Node const *;
+        auto GetChildTexts(void) const;
         auto GetNodeType(void) const -> XML::NodeType;
         auto GetParentNode(void) const -> XML::Node const *;
     protected:
@@ -88,9 +95,16 @@ namespace XML
     private:
         XML::Element * m_DocumentElement;
     };
-    
-    auto IsElement(XML::Node const * Node) -> bool;
-    auto IsText(XML::Node const * Node) -> bool;
+}
+
+auto XML::Node::GetChildElements(void) const
+{
+    return m_ChildNodes | std::views::filter(XML::IsElement) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Element const *>(Node); });
+}
+
+auto XML::Node::GetChildTexts(void) const
+{
+    return m_ChildNodes | std::views::filter(XML::IsText) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Text const *>(Node); });
 }
 
 #endif
