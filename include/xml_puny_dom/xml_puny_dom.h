@@ -97,12 +97,12 @@ namespace XML
     };
 }
 
-auto XML::Node::GetChildElements(void) const
+inline auto XML::Node::GetChildElements(void) const
 {
     return m_ChildNodes | std::views::filter(XML::IsElement) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Element const *>(Node); });
 }
 
-auto XML::Node::GetChildTexts(void) const
+inline auto XML::Node::GetChildTexts(void) const
 {
     return m_ChildNodes | std::views::filter(XML::IsText) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Text const *>(Node); });
 }
