@@ -59,8 +59,14 @@ auto main([[maybe_unused]] int argc, [[maybe_unused]] char * argv[]) -> int
         assert(DOM->GetDocumentElement()->GetName() == "root");
         assert(DOM->GetDocumentElement()->GetChildNodes().size() == 3);
         assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[0]) == true);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[0]->GetSourceLine() == 0);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[0]->GetSourceColumn() == 6);
         assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[1]) == true);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[1]->GetSourceLine() == 0);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[1]->GetSourceColumn() == 10);
         assert(XML::IsElement(DOM->GetDocumentElement()->GetChildNodes()[2]) == true);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[2]->GetSourceLine() == 0);
+        assert(DOM->GetDocumentElement()->GetChildNodes()[2]->GetSourceColumn() == 14);
     }
     {
         auto DOM = ReadDOMFromString("<root><a/>  <b/><c/>   </root>");

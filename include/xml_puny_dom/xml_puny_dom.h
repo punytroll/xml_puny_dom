@@ -48,28 +48,31 @@ namespace XML
     
     class Node
     {
-        friend class XML::Element;
     public:
-        Node(XML::NodeType NodeType, XML::Node * ParentNode);
-        virtual ~Node(void);
-        auto GetChildElements(void) const;
-        auto GetChildNodes(void) const -> std::vector<XML::Node *> const &;
+        Node(XML::NodeType NodeType, XML::Node * ParentNode, std::uint64_t SourceLine, std::uint64_t SourceColumn);
+        virtual ~Node();
+        auto GetChildElements() const;
+        auto GetChildNodes() const -> std::vector<XML::Node *> const &;
         auto GetChildNode(std::vector<XML::Node *>::size_type Index) const -> XML::Node const *;
-        auto GetChildTexts(void) const;
-        auto GetNodeType(void) const -> XML::NodeType;
-        auto GetParentNode(void) const -> XML::Node const *;
+        auto GetChildTexts() const;
+        auto GetNodeType() const -> XML::NodeType;
+        auto GetParentNode() const -> XML::Node const *;
+        auto GetSourceColumn() const -> std::uint64_t;
+        auto GetSourceLine() const -> std::uint64_t;
     protected:
         std::vector<XML::Node *> m_ChildNodes;
         XML::NodeType m_NodeType;
         XML::Node * m_ParentNode;
+        std::uint64_t m_SourceColumn;
+        std::uint64_t m_SourceLine;
     };
     
     class Element : public XML::Node
     {
     public:
-        Element(XML::Node * Parent, std::string const & Name, std::map<std::string, std::string> const & Attributes);
-        auto GetName(void) const -> std::string const &;
-        auto GetAttributes(void) const -> std::map<std::string, std::string> const &;
+        Element(XML::Node * Parent, std::uint64_t SourceLine, std::uint64_t SourceColumn, std::string const & Name, std::map<std::string, std::string> const & Attributes);
+        auto GetName() const -> std::string const &;
+        auto GetAttributes() const -> std::map<std::string, std::string> const &;
         auto GetAttribute(std::string const & AttributeName) const -> std::string const &;
         auto HasAttribute(std::string const & AttributeName) const -> bool;
     private:
@@ -80,8 +83,8 @@ namespace XML
     class Text : public XML::Node
     {
     public:
-        Text(XML::Node * Parent, std::string const & Text);
-        auto GetText(void) const -> std::string const &;
+        Text(XML::Node * Parent, std::uint64_t SourceLine, std::uint64_t SourceColumn, std::string const & Text);
+        auto GetText() const -> std::string const &;
     private:
         std::string m_Text;
     };
@@ -90,21 +93,27 @@ namespace XML
     {
     public:
         Document(std::istream & Stream);
-        ~Document(void) override;
-        auto GetDocumentElement(void) const -> XML::Element const *;
+        ~Document() override;
+        auto GetDocumentElement() const -> XML::Element const *;
     private:
         XML::Element * m_DocumentElement;
     };
 }
 
-inline auto XML::Node::GetChildElements(void) const
+inline auto XML::Node::GetChildElements() const
 {
-    return m_ChildNodes | std::views::filter(XML::IsElement) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Element const *>(Node); });
+    return m_ChildNodes | std::views::filter(XML::IsElement) | std::views::transform([](XML::Node const * Node)
+                                                                                     {
+                                                                                         return dynamic_cast<XML::Element const *>(Node);
+                                                                                     });
 }
 
-inline auto XML::Node::GetChildTexts(void) const
+inline auto XML::Node::GetChildTexts() const
 {
-    return m_ChildNodes | std::views::filter(XML::IsText) | std::views::transform([](XML::Node const * Node) { return dynamic_cast<XML::Text const *>(Node); });
+    return m_ChildNodes | std::views::filter(XML::IsText) | std::views::transform([](XML::Node const * Node)
+                                                                                  {
+                                                                                      return dynamic_cast<XML::Text const *>(Node);
+                                                                                  });
 }
 
 #endif

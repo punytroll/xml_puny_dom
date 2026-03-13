@@ -1,7 +1,8 @@
-[wrap-git]
-url = https://github.com/punytroll/xml_parser.git
-revision = main
-depth = 1
+[wrap-file]
+directory = xml_parser-26.3.1
+source_url = https://github.com/punytroll/xml_parser/archive/refs/tags/26.3.1.tar.gz
+source_filename = xml_parser-26.3.1.tar.xz
+source_hash = 632d0d5b102b65db25c5412460132464d5d018a6d38872ef9c15fa51b51f270c
 
 [provide]
-xml_parser = xml_parser_library_dependency
+dependency_names = xml_parser
