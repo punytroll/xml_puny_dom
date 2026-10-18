@@ -82,12 +82,8 @@ namespace XML
     {
     public:
         Document();
-        ~Document() override;
         auto GetDocumentElement() const -> XML::Element const *;
         auto LoadFromStream(std::istream & Stream) -> std::expected<void, XML::Error>;
-        
-    private:
-        XML::Element * m_DocumentElement{nullptr};
     };
 }
 

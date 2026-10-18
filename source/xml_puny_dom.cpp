@@ -17,55 +17,38 @@ namespace XML
     class DOMReader : public XML::Parser
     {
     public:
-        DOMReader(std::istream & Stream, XML::Document * Document, XML::Element ** RootElement);
+        DOMReader(std::istream & Stream, XML::Document & Document);
         auto ElementStart(std::string const & Name, std::map<std::string, std::string> const & Attributes, XML::Location const & StartLocation) -> void override;
         auto ElementEnd(std::string const & Name) -> void override;
         auto Text(std::string const & Text, XML::Location const & StartLocation) -> void override;
         
     private:
-        XML::Document * m_Document;
+        XML::Document & m_Document;
         XML::Element ** m_RootElement;
-        std::stack<XML::Element *> m_ElementStack;
+        std::stack<XML::Node *> m_NodeStack;
     };
 }
 
-XML::DOMReader::DOMReader(std::istream & Stream, XML::Document * Document, XML::Element ** RootElement) :
+XML::DOMReader::DOMReader(std::istream & Stream, XML::Document & Document) :
     XML::Parser{Stream},
-    m_Document{Document},
-    m_RootElement{RootElement}
+    m_Document{Document}
 {
+    m_NodeStack.push(std::addressof(m_Document));
 }
 
 void XML::DOMReader::ElementStart(std::string const & Name, std::map<std::string, std::string> const & Attributes, XML::Location const & StartLocation)
 {
-    if(*m_RootElement == nullptr)
-    {
-        // we've got the root element
-        m_ElementStack.push(*m_RootElement = new XML::Element{m_Document, StartLocation.Line, StartLocation.Column, Name, Attributes});
-    }
-    else
-    {
-        m_ElementStack.push(new XML::Element{m_ElementStack.top(), StartLocation.Line, StartLocation.Column, Name, Attributes});
-    }
+    m_NodeStack.push(new XML::Element{m_NodeStack.top(), StartLocation.Line, StartLocation.Column, Name, Attributes});
 }
 
 void XML::DOMReader::ElementEnd([[maybe_unused]] std::string const & Name)
 {
-    m_ElementStack.pop();
+    m_NodeStack.pop();
 }
 
 void XML::DOMReader::Text(std::string const & Text, XML::Location const & StartLocation)
 {
-    if(m_ElementStack.size() > 0)
-    {
-        new XML::Text{m_ElementStack.top(), StartLocation.Line, StartLocation.Column, Text};
-    }
-    else
-    {
-        std::cerr << "Misformed XML: Got text \"" << Text << "\" outside of root element." << std::endl;
-        
-        throw std::domain_error("NoElement");
-    }
+    new XML::Text{m_NodeStack.top(), StartLocation.Line, StartLocation.Column, Text};
 }
 
 XML::Node::Node(XML::NodeType NodeType, XML::Node * ParentNode, std::uint64_t SourceLine, std::uint64_t SourceColumn) :
@@ -171,20 +154,22 @@ XML::Document::Document() :
 {
 }
 
-XML::Document::~Document()
-{
-    delete m_DocumentElement;
-    m_DocumentElement = nullptr;
-}
-
 auto XML::Document::GetDocumentElement() const -> XML::Element const *
 {
-    return m_DocumentElement;
+    for(auto ChildNode : GetChildNodes())
+    {
+        if(XML::IsElement(ChildNode) == true)
+        {
+            return dynamic_cast<XML::Element const *>(ChildNode);
+        }
+    }
+    
+    return nullptr;
 }
 
 auto XML::Document::LoadFromStream(std::istream & Stream) -> std::expected<void, XML::Error>
 {
-    auto DOMReader = XML::DOMReader{Stream, this, &m_DocumentElement};
+    auto DOMReader = XML::DOMReader{Stream, *this};
     auto ParseResult = DOMReader.Parse();
     
     if(ParseResult.has_value() == true)
