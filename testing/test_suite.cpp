@@ -31,8 +31,17 @@
 auto ReadDOMFromString(std::string const & String) -> std::unique_ptr<XML::Document>
 {
     auto StringStream = std::istringstream{String};
+    auto Result = std::make_unique<XML::Document>();
+    auto ParseResult = Result->LoadFromStream(StringStream);
     
-    return std::make_unique<XML::Document>(StringStream);
+    if(ParseResult.has_value() == true)
+    {
+        return Result;
+    }
+    else
+    {
+        throw ParseResult.error();
+    }
 }
 
 auto main([[maybe_unused]] int argc, [[maybe_unused]] char * argv[]) -> int

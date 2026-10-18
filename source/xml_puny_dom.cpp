@@ -1,24 +1,7 @@
 /**
- * galactic-fall
+ * xml_puny_dom
  * Copyright (C) 2006-2022  Hagen Möbius
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * SPDX-License-Identifier: MIT
 **/
 
 #include <algorithm>
@@ -26,8 +9,6 @@
 #include <iostream>
 #include <stack>
 #include <stdexcept>
-
-#include <xml_parser/parser.h>
 
 #include <xml_puny_dom/xml_puny_dom.h>
 
@@ -40,6 +21,7 @@ namespace XML
         auto ElementStart(std::string const & Name, std::map<std::string, std::string> const & Attributes, XML::Location const & StartLocation) -> void override;
         auto ElementEnd(std::string const & Name) -> void override;
         auto Text(std::string const & Text, XML::Location const & StartLocation) -> void override;
+        
     private:
         XML::Document * m_Document;
         XML::Element ** m_RootElement;
@@ -67,20 +49,8 @@ void XML::DOMReader::ElementStart(std::string const & Name, std::map<std::string
     }
 }
 
-void XML::DOMReader::ElementEnd(std::string const & Name)
+void XML::DOMReader::ElementEnd([[maybe_unused]] std::string const & Name)
 {
-    if(m_ElementStack.size() == 0)
-    {
-        std::cerr << "Got '/" << Name << "' but stack is empty." << std::endl;
-        
-        throw std::domain_error{Name};
-    }
-    if(Name != m_ElementStack.top()->GetName())
-    {
-        std::cerr << "Got '/" << Name << "' but expected '/" << m_ElementStack.top()->GetName() << "'." << std::endl;
-        
-        throw std::domain_error{Name};
-    }
     m_ElementStack.pop();
 }
 
@@ -196,13 +166,9 @@ auto XML::Text::GetText() const -> std::string const &
     return m_Text;
 }
 
-XML::Document::Document(std::istream & Stream) :
-    XML::Node{XML::NodeType::Document, nullptr, 0, 0},
-    m_DocumentElement{nullptr}
+XML::Document::Document() :
+    XML::Node{XML::NodeType::Document, nullptr, 0, 0}
 {
-    auto DOMReader = XML::DOMReader{Stream, this, &m_DocumentElement};
-    
-    DOMReader.Parse();
 }
 
 XML::Document::~Document()
@@ -214,6 +180,21 @@ XML::Document::~Document()
 auto XML::Document::GetDocumentElement() const -> XML::Element const *
 {
     return m_DocumentElement;
+}
+
+auto XML::Document::LoadFromStream(std::istream & Stream) -> std::expected<void, XML::Error>
+{
+    auto DOMReader = XML::DOMReader{Stream, this, &m_DocumentElement};
+    auto ParseResult = DOMReader.Parse();
+    
+    if(ParseResult.has_value() == true)
+    {
+        return {};
+    }
+    else
+    {
+        return std::unexpected{ParseResult.error()};
+    }
 }
 
 auto XML::IsElement(XML::Node const * Node) -> bool
