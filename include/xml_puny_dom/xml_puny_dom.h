@@ -14,7 +14,7 @@
 #include <vector>
 #include <ranges>
 
-#include <xml_parser/parser.h>
+#include <xml_parser/xml_parser.h>
 
 namespace XML
 {

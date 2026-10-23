@@ -1,8 +1,8 @@
 [wrap-file]
-directory = xml_parser-26.10.1
-source_url = https://github.com/punytroll/xml_parser/archive/refs/tags/26.10.1.tar.gz
-source_filename = xml_parser-26.10.1.tar.xz
-source_hash = ed0caa35580215132b15121e37b5250e2f99ea11e3d04b56d2118bb76f99d5b9
+directory = xml_parser-26.10.2
+source_url = https://github.com/punytroll/xml_parser/archive/refs/tags/26.10.2.tar.gz
+source_filename = xml_parser-26.10.2.tar.xz
+source_hash = 2c8dabb0befe713b685eefac3df8e032fdd5c559802e207360f955272e854850
 
 [provide]
 dependency_names = xml_parser

@@ -1,7 +1,7 @@
 project(
   'xml_puny_dom',
   'cpp',
-  version: '26.10.0',
+  version: '26.10.1',
   meson_version: '>=1.10.0',
   default_options: [
     'cpp_std=c++23',
@@ -11,7 +11,7 @@ project(
 )
 
 subproject('xml_parser')
-xml_parser_dependency = dependency('xml_parser')
+xml_parser_dependency = dependency('xml_parser', version: '>=26.10.2')
 
 xml_puny_dom_library_include_directories = include_directories('include')
 
